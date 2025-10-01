@@ -1,0 +1,51 @@
+services:
+  web:
+    build: .
+    container_name: php-apache
+    volumes:
+      - ./www:/var/www/html
+    ports:
+      - "8082:80"
+    networks:
+      - mynet
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: nopass
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpass
+      TZ: Asia/Dhaka
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - mynet
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:4.9
+    container_name: phpmyadmin-container
+    environment:
+      PMA_HOST: mysql-container
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"
+    networks:
+      - mynet
+    depends_on:
+      - db
+    restart: unless-stopped
+
+networks:
+  mynet:
+    driver: bridge
+
+volumes:
+  mysql-data:
